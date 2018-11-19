@@ -1,8 +1,10 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent),
+using namespace cv::face;
+using namespace std;
+
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
@@ -14,16 +16,8 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::on_pushButton_2_clicked()
-{
-    QString image = QFileDialog::getOpenFileName(this, tr("Open File"),
-                                                 "/home",
-                                                 tr("Images (*.png *.xpm *.jpg)"));
-    ui->label->setPixmap(QPixmap::fromImage(QImage(image)));
-}
 
-
-static void read_csv(QFile& file, QVector<cv::Mat>& images, QVector<int>& labels, char separator = ';') {
+static void read_csv(QFile& file, vector<cv::Mat>& images, vector<int>& labels, char separator = ';') {
     QString line;
     QStringList csv_elem;
     bool is_number = false;
@@ -40,9 +34,7 @@ static void read_csv(QFile& file, QVector<cv::Mat>& images, QVector<int>& labels
                    labels.push_back(elem.toInt());
                 }
                 else images.push_back(cv::imread(elem.toStdString(),0));
-
             }
-
         }
 
         file.close();
@@ -50,7 +42,8 @@ static void read_csv(QFile& file, QVector<cv::Mat>& images, QVector<int>& labels
 
 }
 
-void MainWindow::on_pushButton_clicked()
+
+void MainWindow::on_train_clicked()
 {
     QString directory = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
                                                           "/home",
@@ -67,24 +60,23 @@ void MainWindow::on_pushButton_clicked()
     if (file.open((QIODevice::ReadWrite))) {
         QTextStream stream(&file);
 
-    while(iter.hasNext()) {
-        file_dump = iter.next();
+        while(iter.hasNext()) {
+            file_dump = iter.next();
 
-     if (file_dump.isDir() && file_dump.fileName().contains('s'))
-         subj_int = file_dump.fileName().remove('s').toInt();
+        if (file_dump.isDir() && file_dump.fileName().contains('s'))
+             subj_int = file_dump.fileName().remove('s').toInt();
 
-     if (!file_dump.suffix().compare("pgm")) {
-         stream<<file_dump.absoluteFilePath();
-         stream<<";"<<subj_int<<endl;
-     }
-
+        if (!file_dump.suffix().compare("pgm")) {
+             stream<<file_dump.absoluteFilePath();
+            stream<<";"<<subj_int<<endl;
+        }
     }
 
     file.close();
     }
 
-    QVector<cv::Mat> images;
-    QVector<int> labels;
+    std::vector<cv::Mat> images;
+    std::vector<int> labels;
 
     try {
         read_csv(file, images, labels);
@@ -98,11 +90,31 @@ void MainWindow::on_pushButton_clicked()
     int height = images.at(0).rows;
     cv::Mat test_sample = images[images.size() -1];
     int test_label = labels[labels.size() -1];
-    images.removeLast();
-    labels.removeLast();
-    
-    //Create LBH model and train it with the images given in the csv file
-  //  cv::Ptr<cv::FaceRecognizer> model = cv::cre
+    images.pop_back();
+    labels.pop_back();
 
+    //Create LBH model and train it with the images given in the csv file
+    cv::Ptr<cv::face::FaceRecognizer> model = LBPHFaceRecognizer::create();
+    model->train((cv::InputArrayOfArrays)images, (cv::InputArray) labels);
+    qDebug()<<"train";
+    int predictedLabel = model->predict(test_sample);
+    qDebug()<<"Predicted class  / Actual class ="<<predictedLabel << test_label <<endl;
+      // First we'll use it to set the threshold of the LBPHFaceRecognizer
+      // to 0.0 without retraining the model. This can be useful if
+      // you are evaluating the model:
+      //
+      model->setThreshold(0.0);
+      // Now the threshold of this model is set to 0.0. A prediction
+      // now returns -1, as it's impossible to have a distance below
+      // it
+      predictedLabel = model->predict(test_sample);
+      qDebug() << "Predicted class = " << predictedLabel << endl;
 }
 
+void MainWindow::on_recognize_clicked()
+{
+    QString image = QFileDialog::getOpenFileName(this, tr("Open File"),
+                                                 "/home",
+                                                 tr("Images (*.png *.xpm *.jpg)"));
+    ui->label->setPixmap(QPixmap::fromImage(QImage(image)));
+}

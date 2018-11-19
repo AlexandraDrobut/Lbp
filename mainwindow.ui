@@ -27,7 +27,7 @@
      <string/>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton">
+   <widget class="QPushButton" name="train">
     <property name="geometry">
      <rect>
       <x>1110</x>
@@ -40,7 +40,7 @@
      <string>Train</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_2">
+   <widget class="QPushButton" name="recognize">
     <property name="geometry">
      <rect>
       <x>1110</x>
@@ -53,7 +53,7 @@
      <string>Recognize</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_3">
+   <widget class="QPushButton" name="real_time_recognize">
     <property name="geometry">
      <rect>
       <x>1110</x>
