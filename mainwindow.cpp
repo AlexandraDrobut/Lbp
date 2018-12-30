@@ -7,13 +7,24 @@ using namespace std;
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
+    recognizer = new FaceRec();
+
+    QObject::connect(recognizer, SIGNAL(image_processed(QImage)),
+                                    this, SLOT(updateFrame(QImage)));
     ui->setupUi(this);
+    this->setWindowTitle("Local Binary Patterns");
+    QPixmap bkgnd("/home/alexandra/Desktop/download(1).png");
+    bkgnd = bkgnd.scaled(this->size(), Qt::IgnoreAspectRatio);
+    QPalette palette;
+    palette.setBrush(QPalette::Background, bkgnd);
+    this->centralWidget()->setPalette(palette);
 
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+    delete recognizer;
 }
 
 
@@ -50,11 +61,18 @@ void MainWindow::on_train_clicked()
                                                           QFileDialog::ShowDirsOnly
                                                           | QFileDialog::DontResolveSymlinks);
 
+    if (directory == NULL)
+      qDebug() << "No directory specified, aborting!";
+
     QDirIterator iter(directory, QDirIterator::Subdirectories);
     QFileInfo file_dump;
     int subj_int = 0;
 
     QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"));
+
+    if (fileName == NULL)
+        fileName = DEFAUL_SAVE_FILE;
+
     QFile file(fileName);
 
     if (file.open((QIODevice::ReadWrite))) {
@@ -66,7 +84,7 @@ void MainWindow::on_train_clicked()
         if (file_dump.isDir() && file_dump.fileName().contains('s'))
              subj_int = file_dump.fileName().remove('s').toInt();
 
-        if (!file_dump.suffix().compare("pgm")) {
+        if (!file_dump.suffix().compare("pgm") || !file_dump.suffix().compare("jpg")) {
              stream<<file_dump.absoluteFilePath();
             stream<<";"<<subj_int<<endl;
         }
@@ -85,36 +103,38 @@ void MainWindow::on_train_clicked()
         qDebug()<<"Error reading the files)";
         exit(1);
     }
-
-    //Get the height from the first image
-    int height = images.at(0).rows;
-    cv::Mat test_sample = images[images.size() -1];
-    int test_label = labels[labels.size() -1];
-    images.pop_back();
-    labels.pop_back();
-
     //Create LBH model and train it with the images given in the csv file
-    cv::Ptr<cv::face::FaceRecognizer> model = LBPHFaceRecognizer::create();
-    model->train((cv::InputArrayOfArrays)images, (cv::InputArray) labels);
-    qDebug()<<"train";
-    int predictedLabel = model->predict(test_sample);
-    qDebug()<<"Predicted class  / Actual class ="<<predictedLabel << test_label <<endl;
-      // First we'll use it to set the threshold of the LBPHFaceRecognizer
-      // to 0.0 without retraining the model. This can be useful if
-      // you are evaluating the model:
-      //
-      model->setThreshold(0.0);
-      // Now the threshold of this model is set to 0.0. A prediction
-      // now returns -1, as it's impossible to have a distance below
-      // it
-      predictedLabel = model->predict(test_sample);
-      qDebug() << "Predicted class = " << predictedLabel << endl;
+    model = LBPHFaceRecognizer::create();
+    model->train(images,labels);
 }
 
 void MainWindow::on_recognize_clicked()
 {
-    QString image = QFileDialog::getOpenFileName(this, tr("Open File"),
-                                                 "/home",
-                                                 tr("Images (*.png *.xpm *.jpg)"));
-    ui->label->setPixmap(QPixmap::fromImage(QImage(image)));
+    QString fileName = QFileDialog::getOpenFileName(this,
+                                                   tr("Open Image"),
+                                                   tr("."),
+                                                   tr("Image Files (*.jpg *.pgm)"));
+
+    matrice = cv::imread(fileName.toStdString(), 0 );
+
+    if(this->model == NULL) {
+        ui->label_2->setText("Didn't train any model retry!");
+        on_train_clicked();
+    }
+    recognizer->set_model(this->model);
+    recognizer->setFrame(matrice);
+    recognizer->openCameraVideo();
+}
+
+
+void MainWindow::updateFrame(QImage Frame)
+{
+        ui->label->setAlignment(Qt::AlignCenter);
+        ui->label->setPixmap(QPixmap::fromImage(Frame).scaled(ui->label->size()
+                                          , Qt::KeepAspectRatio, Qt::FastTransformation));
+}
+
+void MainWindow::on_real_time_recognize_clicked()
+{
+    recognizer->stop();
 }

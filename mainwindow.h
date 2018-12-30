@@ -5,6 +5,7 @@
 #include <QFileDialog>
 #include <QDirIterator>
 #include <QTextStream>
+#include "facerec.h"
 #include "opencv2/core/core.hpp"
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/opencv.hpp"
@@ -19,6 +20,9 @@
 #include <QVector>
 #include <qdebug.h>
 #include <vector>
+
+#define DEFAUL_SAVE_FILE "/faces"
+Q_DECLARE_METATYPE(cv::Mat)
 
 namespace Ui {
 class MainWindow;
@@ -36,8 +40,15 @@ private slots:
 
     void on_recognize_clicked();
 
+    void updateFrame(QImage Frame);
+
+    void on_real_time_recognize_clicked();
+
 private:
     Ui::MainWindow *ui;
+    cv::Ptr<cv::face::FaceRecognizer> model;
+    cv::Mat matrice;
+    FaceRec *recognizer;
 };
 
 #endif // MAINWINDOW_H
