@@ -23,14 +23,17 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 INCLUDEPATH +=/usr/local/include/opencv2/
-LIBS += -L/usr/local/lib -lopencv_core -lopencv_imgcodecs -lopencv_highgui -lopencv_face
+LIBS += -L/usr/local/lib -lopencv_core -lopencv_imgcodecs -lopencv_highgui -lopencv_face -lopencv_imgproc \
+        -lopencv_video -lopencv_videoio
 
 SOURCES += \
         main.cpp \
-        mainwindow.cpp
+        mainwindow.cpp \
+    facerec.cpp
 
 HEADERS += \
-        mainwindow.h
+        mainwindow.h \
+    facerec.h
 
 FORMS += \
         mainwindow.ui
