@@ -1,7 +1,9 @@
-QT -= gui
+QT -= core gui
 
 CONFIG += c++11 console
 CONFIG -= app_bundle
+
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -21,3 +23,6 @@ SOURCES += \
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+INCLUDEPATH +=/usr/local/include/opencv2/
+LIBS += -L/usr/local/lib -lopencv_core -lopencv_imgcodecs -lopencv_highgui -lopencv_face -lopencv_imgproc \
+        -lopencv_video -lopencv_videoio
