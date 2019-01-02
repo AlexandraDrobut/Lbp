@@ -38,9 +38,6 @@ private:
     cv::Mat frame;
     cv::Mat g_frame;
     QImage image;
-    bool stop_now;
-    QMutex mutex;
-    QWaitCondition condition;
     cv::VideoCapture videosource;
 };
 
