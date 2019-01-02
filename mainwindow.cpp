@@ -116,17 +116,16 @@ void MainWindow::on_actionRecognize_changed()
     matrice = cv::imread(fileName.toStdString(), 0 );
 
     if(this->model == NULL) {
-        ui->label_2->setText("Didn't train any model retry!");
         on_actionTrain_changed();
     }
 
     try  {
-    recognizer->set_model(this->model);
-    recognizer->setFrame(matrice);
-    recognizer->openCameraVideo();
+        recognizer->set_model(this->model);
+        recognizer->setFrame(matrice);
+        recognizer->openCameraVideo();
     } catch(cv::Exception &e) {
         exit(1);
     }
 
-    recognizer->stop();
+    //recognizer->stop();
 }
