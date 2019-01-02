@@ -15,6 +15,8 @@ using namespace cv;
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+    QFileInfo file_dump;
+    cv::String absolute_path;
     cv::Mat source, desitnation;
     Size size(DEF_WIDTH, DEF_HEIGHT);
     QString directory = QFileDialog::getExistingDirectory(NULL, "Open Directory",
@@ -24,17 +26,18 @@ int main(int argc, char *argv[])
 
 
     QDirIterator iter(directory, QDirIterator::Subdirectories);
-    QFileInfo file_dump;
 
     while(iter.hasNext()) {
         file_dump = iter.next();
 
 
-    if (!file_dump.suffix().compare("pgm") || !file_dump.suffix().compare("jpg")) {
-         source = imread(file_dump.absoluteFilePath().toStdString(), CV_LOAD_IMAGE_COLOR);
-         resize(source, source, size);
+        if (!file_dump.suffix().compare("pgm") || !file_dump.suffix().compare("jpg")) {
+             absolute_path = file_dump.absoluteFilePath().toStdString();
+             source = imread(absolute_path, CV_LOAD_IMAGE_COLOR);
+             resize(source, source, size);
+             imwrite(absolute_path, source);
+        }
     }
-}
 
     return a.exec();
 }
