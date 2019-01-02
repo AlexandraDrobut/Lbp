@@ -14,7 +14,11 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/opencv.hpp>
 #include <opencv2/video.hpp>
-#include <qdebug.h>
+
+#define W_SIZE 400
+#define DEF_WIDTH 97
+#define DEF_HEIGHT 112
+using namespace  cv;
 
 class FaceRec : public QThread
 {
