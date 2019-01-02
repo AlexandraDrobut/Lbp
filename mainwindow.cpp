@@ -1,9 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-using namespace cv::face;
-using namespace std;
-
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
@@ -13,12 +10,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
                                     this, SLOT(updateFrame(QImage)));
     ui->setupUi(this);
     this->setWindowTitle("Local Binary Patterns");
-    QPixmap bkgnd("/home/alexandra/Desktop/download(1).png");
-    bkgnd = bkgnd.scaled(this->size(), Qt::IgnoreAspectRatio);
-    QPalette palette;
-    palette.setBrush(QPalette::Background, bkgnd);
-    this->centralWidget()->setPalette(palette);
-
 }
 
 MainWindow::~MainWindow()
@@ -28,7 +19,7 @@ MainWindow::~MainWindow()
 }
 
 
-static void read_csv(QFile& file, vector<cv::Mat>& images, vector<int>& labels, char separator = ';') {
+void MainWindow::read_csv(QFile& file, vector<cv::Mat>& images, vector<int>& labels) {
     QString line;
     QStringList csv_elem;
     bool is_number = false;
@@ -53,16 +44,23 @@ static void read_csv(QFile& file, vector<cv::Mat>& images, vector<int>& labels, 
 
 }
 
-
-void MainWindow::on_train_clicked()
+void MainWindow::updateFrame(QImage Frame)
 {
+        ui->label->setAlignment(Qt::AlignCenter);
+        ui->label->setPixmap(QPixmap::fromImage(Frame).scaled(ui->label->size()
+                                          , Qt::KeepAspectRatio, Qt::FastTransformation));
+}
+
+void MainWindow::on_actionTrain_changed()
+{
+
     QString directory = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
                                                           "/home",
                                                           QFileDialog::ShowDirsOnly
                                                           | QFileDialog::DontResolveSymlinks);
 
     if (directory == NULL)
-      qDebug() << "No directory specified, aborting!";
+        qDebug() << "No directory specified, aborting!";
 
     QDirIterator iter(directory, QDirIterator::Subdirectories);
     QFileInfo file_dump;
@@ -97,10 +95,10 @@ void MainWindow::on_train_clicked()
     std::vector<int> labels;
 
     try {
-        read_csv(file, images, labels);
+        MainWindow::read_csv(file, images, labels);
     }
     catch(cv::Exception& e) {
-        qDebug()<<"Error reading the files)";
+        qDebug()<<"Error reading the files";
         exit(1);
     }
     //Create LBH model and train it with the images given in the csv file
@@ -108,7 +106,7 @@ void MainWindow::on_train_clicked()
     model->train(images,labels);
 }
 
-void MainWindow::on_recognize_clicked()
+void MainWindow::on_actionRecognize_changed()
 {
     QString fileName = QFileDialog::getOpenFileName(this,
                                                    tr("Open Image"),
@@ -119,22 +117,16 @@ void MainWindow::on_recognize_clicked()
 
     if(this->model == NULL) {
         ui->label_2->setText("Didn't train any model retry!");
-        on_train_clicked();
+        on_actionTrain_changed();
     }
+
+    try  {
     recognizer->set_model(this->model);
     recognizer->setFrame(matrice);
     recognizer->openCameraVideo();
-}
+    } catch(cv::Exception &e) {
+        exit(1);
+    }
 
-
-void MainWindow::updateFrame(QImage Frame)
-{
-        ui->label->setAlignment(Qt::AlignCenter);
-        ui->label->setPixmap(QPixmap::fromImage(Frame).scaled(ui->label->size()
-                                          , Qt::KeepAspectRatio, Qt::FastTransformation));
-}
-
-void MainWindow::on_real_time_recognize_clicked()
-{
     recognizer->stop();
 }

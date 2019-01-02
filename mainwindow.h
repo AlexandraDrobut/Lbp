@@ -24,9 +24,13 @@
 #define DEFAUL_SAVE_FILE "/faces"
 Q_DECLARE_METATYPE(cv::Mat)
 
+using namespace cv::face;
+using namespace std;
+
 namespace Ui {
 class MainWindow;
 }
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -36,13 +40,11 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_train_clicked();
-
-    void on_recognize_clicked();
 
     void updateFrame(QImage Frame);
-
-    void on_real_time_recognize_clicked();
+    static void read_csv(QFile& file, vector<cv::Mat>& images, vector<int>& labels);
+    void on_actionTrain_changed();
+    void on_actionRecognize_changed();
 
 private:
     Ui::MainWindow *ui;

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1761</width>
-    <height>768</height>
+    <width>1177</width>
+    <height>784</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,46 +19,13 @@
      <rect>
       <x>50</x>
       <y>20</y>
-      <width>951</width>
+      <width>1001</width>
       <height>681</height>
      </rect>
     </property>
     <property name="text">
      <string/>
     </property>
-   </widget>
-   <widget class="QWidget" name="verticalLayoutWidget">
-    <property name="geometry">
-     <rect>
-      <x>1180</x>
-      <y>100</y>
-      <width>251</width>
-      <height>201</height>
-     </rect>
-    </property>
-    <layout class="QVBoxLayout" name="verticalLayout_2">
-     <item>
-      <widget class="QPushButton" name="train">
-       <property name="text">
-        <string>Train</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="recognize">
-       <property name="text">
-        <string>Recognize</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="real_time_recognize">
-       <property name="text">
-        <string>Stop</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
    </widget>
    <widget class="QLabel" name="label_2">
     <property name="geometry">
@@ -79,10 +46,18 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1761</width>
+     <width>1177</width>
      <height>22</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuTrai">
+    <property name="title">
+     <string>Menu</string>
+    </property>
+    <addaction name="actionTrain"/>
+    <addaction name="actionRecognize"/>
+   </widget>
+   <addaction name="menuTrai"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -93,6 +68,22 @@
    </attribute>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
+  <action name="actionTrain">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Train</string>
+   </property>
+  </action>
+  <action name="actionRecognize">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Recognize</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>
